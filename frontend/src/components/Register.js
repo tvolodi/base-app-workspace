@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Register = () => {
-  const { register, loading } = useAuth();
+  const { register, loading, registerLoading, error } = useAuth();
 
   const handleRegister = () => {
     register();
@@ -16,7 +16,10 @@ const Register = () => {
   return (
     <div className="auth-form">
       <h2>Register</h2>
-      <button onClick={handleRegister}>Register with Keycloak</button>
+      {error && <div className="error">{error}</div>}
+      <button onClick={handleRegister} disabled={registerLoading}>
+        {registerLoading ? 'Registering...' : 'Register with Keycloak'}
+      </button>
       <p>
         Already have an account? <Link to="/login">Login here</Link>
       </p>

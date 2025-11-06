@@ -11,39 +11,55 @@ export const useAuth = () => {
   return context;
 };
 
+const KEYCLOAK_CONFIG = {
+  url: 'http://localhost:8080',
+  realm: 'base-app',
+  clientId: 'base-app-frontend',
+};
+
 export const AuthProvider = ({ children }) => {
   const [keycloak, setKeycloak] = useState(null);
   const [authenticated, setAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [registerLoading, setRegisterLoading] = useState(false);
+  const [error, setError] = useState(null);
   const initialized = useRef(false);
 
   useEffect(() => {
     if (!initialized.current) {
       initialized.current = true;
       const initKeycloak = async () => {
-        console.log('Initializing Keycloak...');
-        const keycloakInstance = new Keycloak('/keycloak.json');
+        const keycloakInstance = new Keycloak({
+          url: KEYCLOAK_CONFIG.url,
+          realm: KEYCLOAK_CONFIG.realm,
+          clientId: KEYCLOAK_CONFIG.clientId,
+        });
         try {
           const authenticated = await keycloakInstance.init({
             onLoad: 'check-sso',
             silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
             checkLoginIframe: false,
           });
-          console.log('Keycloak initialized, authenticated:', authenticated);
           setKeycloak(keycloakInstance);
           setAuthenticated(authenticated);
           if (authenticated) {
-            console.log('User authenticated, setting user info');
             setUser({
               name: keycloakInstance.tokenParsed?.name,
               email: keycloakInstance.tokenParsed?.email,
               preferred_username: keycloakInstance.tokenParsed?.preferred_username,
             });
+            // Set up token refresh
+            keycloakInstance.onTokenExpired = () => {
+              keycloakInstance.updateToken(70).catch(() => {
+                // Token refresh failed, logout
+                logout();
+              });
+            };
           }
-          console.log('Setting loading to false');
         } catch (error) {
-          console.error('Keycloak initialization failed', error);
+          setError('Failed to initialize authentication. Please try again.');
         } finally {
           setLoading(false);
         }
@@ -53,25 +69,39 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = () => {
-    console.log('Login called, redirecting to Keycloak');
-    if (keycloak) {
-      keycloak.login({ redirectUri: window.location.origin + '/profile' });
+  const login = async () => {
+    if (!keycloak) return;
+    setLoginLoading(true);
+    setError(null);
+    try {
+      await keycloak.login({ redirectUri: window.location.origin + '/profile' });
+    } catch (err) {
+      setError('Login failed. Please try again.');
+    } finally {
+      setLoginLoading(false);
     }
   };
 
-  const register = () => {
-    console.log('Register called, redirecting to Keycloak');
-    if (keycloak) {
-      keycloak.register({ redirectUri: window.location.origin + '/profile' });
+  const register = async () => {
+    if (!keycloak) return;
+    setRegisterLoading(true);
+    setError(null);
+    try {
+      await keycloak.register({ redirectUri: window.location.origin + '/profile' });
+    } catch (err) {
+      setError('Registration failed. Please try again.');
+    } finally {
+      setRegisterLoading(false);
     }
   };
 
   const logout = () => {
-    console.log('Logout called');
     if (keycloak) {
       keycloak.logout();
     }
+    setAuthenticated(false);
+    setUser(null);
+    setError(null);
   };
 
   const value = {
@@ -79,6 +109,9 @@ export const AuthProvider = ({ children }) => {
     authenticated,
     user,
     loading,
+    loginLoading,
+    registerLoading,
+    error,
     login,
     register,
     logout,

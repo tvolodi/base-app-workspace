@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
@@ -32,6 +32,17 @@ const PublicRoute = ({ children }) => {
 const Header = () => {
   const { isAuthenticated } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="App-header">
@@ -41,7 +52,7 @@ const Header = () => {
           <Link to="/">Home</Link>
         </div>
         <div className="nav-right">
-          <div className="profile-menu">
+          <div className="profile-menu" ref={dropdownRef}>
             <button onClick={() => setDropdownOpen(!dropdownOpen)}>Profile</button>
             {dropdownOpen && (
               <div className="dropdown">
