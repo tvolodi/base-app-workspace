@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './components/Login';
 import Register from './components/Register';
 import Profile from './components/Profile';
@@ -8,6 +9,8 @@ import PrimeReactProfile from './components/PrimeReactProfile';
 import PrimeReactUserManagement from './components/PrimeReactUserManagement';
 import './App.css';
 import { t } from './translations';
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -102,62 +105,62 @@ const Header = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="App">
-          <Header />
-          <main>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route
-                path="/login"
-                element={
-                  <PublicRoute>
-                    <Login />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/register"
-                element={
-                  <PublicRoute>
-                    <Register />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/prime-profile"
-                element={
-                  <ProtectedRoute>
-                    <PrimeReactProfile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/prime-users"
-                element={
-                  <ProtectedRoute>
-                    <PrimeReactUserManagement />
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-          </main>
-        </div>
-      </Router>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <div className="App">
+            <Header />
+            <main>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route
+                  path="/login"
+                  element={
+                    <PublicRoute>
+                      <Login />
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/register"
+                  element={
+                    <PublicRoute>
+                      <Register />
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/prime-profile"
+                  element={
+                    <ProtectedRoute>
+                      <PrimeReactProfile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/prime-users"
+                  element={
+                    <ProtectedRoute>
+                      <PrimeReactUserManagement />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </main>
+          </div>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
-}
-
-const Home = () => {
+}const Home = () => {
   const { authenticated, user } = useAuth();
 
   return (
