@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import Login from './components/Login';
 import Register from './components/Register';
 import Profile from './components/Profile';
 import PrimeReactProfile from './components/PrimeReactProfile';
 import PrimeReactUserManagement from './components/PrimeReactUserManagement';
 import './App.css';
+import './theme/primeReactOverrides.css';
 import { t } from './translations';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -37,9 +38,19 @@ const PublicRoute = ({ children }) => {
 // Header component
 const Header = () => {
   const { authenticated } = useAuth();
+  const { getThemeInfo } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [showThemeIndicator, setShowThemeIndicator] = useState(false);
   const dropdownRef = useRef(null);
+  const themeInfo = getThemeInfo();
+
+  // Show theme indicator when theme changes
+  useEffect(() => {
+    setShowThemeIndicator(true);
+    const timer = setTimeout(() => setShowThemeIndicator(false), 3000);
+    return () => clearTimeout(timer);
+  }, [themeInfo?.value]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -75,31 +86,40 @@ const Header = () => {
   };
 
   return (
-    <header className="App-header">
-      <h1>Base-Application</h1>
-      <nav>
-        <div className="nav-left">
-          <Link to="/">Home</Link>
-        </div>
-        <div className="nav-right">
-          <div className="profile-menu" ref={dropdownRef}>
-            <button onClick={() => setDropdownOpen(!dropdownOpen)} onKeyDown={handleKeyDown} aria-expanded={dropdownOpen} aria-haspopup="menu">Profile</button>
-            {dropdownOpen && (
-              <div className="dropdown">
-                {authenticated ? (
-                  <Link to="/profile" onClick={() => setDropdownOpen(false)}>{t('viewProfile')}</Link>
-                ) : (
-                  <>
-                    <Link to="/login" onClick={() => setDropdownOpen(false)}>{t('loginLinkDropdown')}</Link>
-                    <Link to="/register" onClick={() => setDropdownOpen(false)}>{t('registerLinkDropdown')}</Link>
-                  </>
-                )}
-              </div>
-            )}
+    <>
+      <header className="App-header">
+        <h1>Base-Application</h1>
+        <nav>
+          <div className="nav-left">
+            <Link to="/">Home</Link>
           </div>
+          <div className="nav-right">
+            <div className="profile-menu" ref={dropdownRef}>
+              <button onClick={() => setDropdownOpen(!dropdownOpen)} onKeyDown={handleKeyDown} aria-expanded={dropdownOpen} aria-haspopup="menu">Profile</button>
+              {dropdownOpen && (
+                <div className="dropdown">
+                  {authenticated ? (
+                    <Link to="/profile" onClick={() => setDropdownOpen(false)}>{t('viewProfile')}</Link>
+                  ) : (
+                    <>
+                      <Link to="/login" onClick={() => setDropdownOpen(false)}>{t('loginLinkDropdown')}</Link>
+                      <Link to="/register" onClick={() => setDropdownOpen(false)}>{t('registerLinkDropdown')}</Link>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </nav>
+      </header>
+      
+      {/* Theme Indicator */}
+      {showThemeIndicator && themeInfo && (
+        <div className="theme-indicator">
+          🎨 {themeInfo.label}
         </div>
-      </nav>
-    </header>
+      )}
+    </>
   );
 };
 
@@ -164,12 +184,17 @@ function App() {
   const { authenticated, user } = useAuth();
 
   return (
-    <div>
+    <div className="home-container">
       <h2>{t('welcome')}</h2>
       <p>{t('description')}</p>
       {authenticated ? (
         <div>
-          <p>{t('welcomeBack')} {user?.name}!</p>
+          <div className="welcome-card">
+            <p>
+              <strong>{t('welcomeBack')}</strong> {user?.name}! 🎉
+            </p>
+            <p>You're logged in and ready to explore the application.</p>
+          </div>
           <div className="demo-links">
             <h3>Component Demos</h3>
             <ul>
@@ -180,7 +205,15 @@ function App() {
           </div>
         </div>
       ) : (
-        <p>Please <Link to="/login">{t('loginLink')}</Link> or <Link to="/register">{t('registerLink')}</Link> {t('continueText')}</p>
+        <div>
+          <div className="welcome-card">
+            <p>Experience a modern, feature-rich application built with React and PrimeReact.</p>
+          </div>
+          <div className="cta-links">
+            <Link to="/login">{t('loginLink')}</Link>
+            <Link to="/register">{t('registerLink')}</Link>
+          </div>
+        </div>
       )}
     </div>
   );

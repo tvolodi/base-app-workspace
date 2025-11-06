@@ -39,28 +39,54 @@ export const ThemeProvider = ({ children }) => {
         }
 
         // Check if theme file exists before setting href
-        const response = await fetch(`/themes/${theme}/theme.css`, { method: 'HEAD' });
+        const themePath = `/themes/${theme}/theme.css`;
+        const response = await fetch(themePath, { method: 'HEAD' });
         if (!response.ok) {
           console.warn(`Theme ${theme} not found, falling back to default`);
           setTheme(DEFAULT_THEME);
           return;
         }
 
-        let link = document.querySelector('link[data-theme]');
-        if (!link) {
-          link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.setAttribute('data-theme', 'primereact');
-          document.head.appendChild(link);
+        // Remove existing theme link
+        const existingLink = document.querySelector('link[data-theme]');
+        if (existingLink) {
+          existingLink.remove();
         }
-        link.href = `/themes/${theme}/theme.css`;
+
+        // Create new theme link
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = themePath;
+        link.setAttribute('data-theme', 'primereact');
+        
+        // Wait for the stylesheet to load
+        await new Promise((resolve, reject) => {
+          link.onload = resolve;
+          link.onerror = reject;
+          document.head.appendChild(link);
+        });
 
         // Save to localStorage
         localStorage.setItem('primeReactTheme', theme);
+
+        // Add theme-specific class to body for custom styling
+        document.body.className = document.body.className.replace(/theme-\S+/g, '');
+        document.body.classList.add(`theme-${theme}`);
+
+        // Special handling for custom theme
+        if (theme === 'custom-purple-gradient') {
+          document.body.classList.add('custom-theme-active');
+        } else {
+          document.body.classList.remove('custom-theme-active');
+        }
+
+        console.log(`✅ Theme '${theme}' loaded successfully`);
       } catch (error) {
         console.error('Failed to load theme:', error);
         // Fallback to default theme
-        setTheme(DEFAULT_THEME);
+        if (theme !== DEFAULT_THEME) {
+          setTheme(DEFAULT_THEME);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -83,11 +109,27 @@ export const ThemeProvider = ({ children }) => {
       return;
     }
 
+    if (newTheme === theme) {
+      console.log(`Theme '${newTheme}' is already active`);
+      return;
+    }
+
+    console.log(`🎨 Changing theme from '${theme}' to '${newTheme}'`);
     setTheme(newTheme);
   };
 
+  const getThemeInfo = () => {
+    return AVAILABLE_THEMES.find(t => t.value === theme) || null;
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, changeTheme, isLoading }}>
+    <ThemeContext.Provider value={{ 
+      theme, 
+      changeTheme, 
+      isLoading,
+      getThemeInfo,
+      isCustomTheme: theme === 'custom-purple-gradient'
+    }}>
       {children}
     </ThemeContext.Provider>
   );

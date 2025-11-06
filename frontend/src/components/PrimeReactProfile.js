@@ -6,10 +6,6 @@ import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import 'primereact/resources/themes/lara-light-indigo/theme.css';
-import 'primereact/resources/primereact.min.css';
-import 'primeicons/primeicons.css';
-import 'primeflex/primeflex.css';
 
 const PrimeReactProfile = () => {
   const { authenticated, user, logout, loading, error } = useAuth();
