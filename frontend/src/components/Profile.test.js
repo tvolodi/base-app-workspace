@@ -2,15 +2,19 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from '../contexts/AuthContext';
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import Profile from './Profile';
 import { axe, toHaveNoViolations } from 'jest-axe';
+import { AVAILABLE_THEMES, DEFAULT_THEME } from '../constants/themes';
 
 expect.extend(toHaveNoViolations);
 
 // Mock Keycloak
 jest.mock('keycloak-js', () => jest.fn());
+
+// Mock fetch for theme validation
+global.fetch = jest.fn();
 
 const renderWithProviders = (component) => {
   return render(
@@ -168,6 +172,9 @@ describe('Profile Component', () => {
   });
 
   test('renders theme selector when authenticated', async () => {
+    // Mock fetch to succeed
+    global.fetch.mockResolvedValueOnce({ ok: true });
+
     const KeycloakMock = require('keycloak-js');
     KeycloakMock.mockImplementation(() => ({
       init: jest.fn(() => true),
@@ -190,10 +197,13 @@ describe('Profile Component', () => {
     expect(screen.getByLabelText('Select UI Theme:')).toBeInTheDocument();
     const select = screen.getByRole('combobox');
     expect(select).toBeInTheDocument();
-    expect(select.value).toBe('lara-light-indigo'); // default theme
+    expect(select.value).toBe(DEFAULT_THEME); // default theme
   });
 
   test('theme selector has correct options', async () => {
+    // Mock fetch to succeed
+    global.fetch.mockResolvedValueOnce({ ok: true });
+
     const KeycloakMock = require('keycloak-js');
     KeycloakMock.mockImplementation(() => ({
       init: jest.fn(() => true),
@@ -215,16 +225,17 @@ describe('Profile Component', () => {
 
     const select = screen.getByRole('combobox');
     const options = screen.getAllByRole('option');
-    expect(options).toHaveLength(6);
-    expect(options[0]).toHaveValue('lara-light-indigo');
-    expect(options[1]).toHaveValue('lara-dark-indigo');
-    expect(options[2]).toHaveValue('lara-light-blue');
-    expect(options[3]).toHaveValue('lara-dark-blue');
-    expect(options[4]).toHaveValue('lara-light-purple');
-    expect(options[5]).toHaveValue('lara-dark-purple');
+    expect(options).toHaveLength(AVAILABLE_THEMES.length);
+    AVAILABLE_THEMES.forEach((theme, index) => {
+      expect(options[index]).toHaveValue(theme.value);
+      expect(options[index]).toHaveTextContent(theme.label);
+    });
   });
 
   test('changing theme updates localStorage', async () => {
+    // Mock fetch to succeed
+    global.fetch.mockResolvedValue({ ok: true });
+
     const KeycloakMock = require('keycloak-js');
     KeycloakMock.mockImplementation(() => ({
       init: jest.fn(() => true),
@@ -253,6 +264,9 @@ describe('Profile Component', () => {
   });
 
   test('theme persists from localStorage', async () => {
+    // Mock fetch to succeed
+    global.fetch.mockResolvedValueOnce({ ok: true });
+
     localStorage.setItem('primeReactTheme', 'lara-dark-purple');
 
     const KeycloakMock = require('keycloak-js');
@@ -276,5 +290,99 @@ describe('Profile Component', () => {
 
     const select = screen.getByRole('combobox');
     expect(select.value).toBe('lara-dark-purple');
+  });
+
+  test('invalid theme falls back to default', async () => {
+    // Mock fetch to succeed for default theme
+    global.fetch.mockResolvedValue({ ok: true });
+    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+    localStorage.setItem('primeReactTheme', 'invalid-theme');
+
+    const KeycloakMock = require('keycloak-js');
+    KeycloakMock.mockImplementation(() => ({
+      init: jest.fn(() => true),
+      login: jest.fn(),
+      logout: jest.fn(),
+      register: jest.fn(),
+      tokenParsed: {
+        name: 'Test User',
+        email: 'test@example.com',
+        preferred_username: 'testuser',
+      },
+    }));
+
+    renderWithProviders(<Profile />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Profile')).toBeInTheDocument();
+    });
+
+    const select = screen.getByRole('combobox');
+    expect(select.value).toBe(DEFAULT_THEME);
+    expect(consoleSpy).toHaveBeenCalledWith('Invalid saved theme: invalid-theme, falling back to default');
+
+    consoleSpy.mockRestore();
+  });
+
+  test('theme loading shows loading indicator', async () => {
+    // Mock fetch to succeed but delay
+    global.fetch.mockImplementationOnce(() => new Promise(resolve => setTimeout(() => resolve({ ok: true }), 100)));
+
+    const KeycloakMock = require('keycloak-js');
+    KeycloakMock.mockImplementation(() => ({
+      init: jest.fn(() => true),
+      login: jest.fn(),
+      logout: jest.fn(),
+      register: jest.fn(),
+      tokenParsed: {
+        name: 'Test User',
+        email: 'test@example.com',
+        preferred_username: 'testuser',
+      },
+    }));
+
+    renderWithProviders(<Profile />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Profile')).toBeInTheDocument();
+    });
+
+    // Initially should show loading
+    expect(screen.getByText('Applying theme...')).toBeInTheDocument();
+
+    // After loading completes, loading indicator should be gone
+    await waitFor(() => {
+      expect(screen.queryByText('Applying theme...')).not.toBeInTheDocument();
+    });
+  });
+
+  test('theme selector is accessible', async () => {
+    // Mock fetch to succeed
+    global.fetch.mockResolvedValueOnce({ ok: true });
+
+    const KeycloakMock = require('keycloak-js');
+    KeycloakMock.mockImplementation(() => ({
+      init: jest.fn(() => true),
+      login: jest.fn(),
+      logout: jest.fn(),
+      register: jest.fn(),
+      tokenParsed: {
+        name: 'Test User',
+        email: 'test@example.com',
+        preferred_username: 'testuser',
+      },
+    }));
+
+    renderWithProviders(<Profile />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Profile')).toBeInTheDocument();
+    });
+
+    const select = screen.getByRole('combobox');
+    expect(select).toHaveAttribute('aria-label', 'Select user interface theme');
+    expect(select).toHaveAttribute('aria-describedby', 'theme-description');
+    expect(screen.getByText('Changing the theme will update the appearance of PrimeReact components throughout the application')).toBeInTheDocument();
   });
 });
