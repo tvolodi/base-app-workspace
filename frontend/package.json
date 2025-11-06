@@ -4,21 +4,28 @@
   "private": true,
   "dependencies": {
     "axios": "^1.13.2",
+    "chart.js": "^4.5.1",
+    "dompurify": "^3.3.0",
+    "formik": "^2.4.6",
     "keycloak-js": "^26.2.1",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
     "primereact": "^10.9.7",
+    "quill": "^2.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.0",
-    "react-scripts": "^5.0.1"
+    "react-scripts": "^5.0.1",
+    "react-toastify": "^11.0.5",
+    "yup": "^1.7.1"
   },
   "scripts": {
     "start": "npm run build && npx serve -s build -l 3000",
     "dev": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "type-check": "tsc --noEmit"
   },
   "eslintConfig": {
     "extends": [
@@ -31,7 +38,15 @@
     ],
     "moduleNameMapper": {
       "\\.(css|less|scss|sass)$": "identity-obj-proxy"
-    }
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
   },
   "browserslist": {
     "production": [
@@ -48,10 +63,19 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
+    "@types/jest": "^29.5.12",
+    "@types/keycloak-js": "^2.5.4",
+    "@types/node": "^20.14.10",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@types/react-router-dom": "^5.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "autoprefixer": "^10.4.21",
     "identity-obj-proxy": "^3.0.0",
     "jest-axe": "^10.0.0",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.16"
+    "tailwindcss": "^4.1.16",
+    "typescript": "^4.9.5"
   }
 }

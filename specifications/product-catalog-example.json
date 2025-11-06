@@ -1,0 +1,457 @@
+{
+  "masterSchema": {
+    "id": "product-catalog",
+    "title": "Product Catalog",
+    "description": "Browse and manage product inventory",
+    "dataSource": {
+      "type": "api",
+      "endpoint": "/api/products",
+      "method": "GET",
+      "pagination": true,
+      "pageSize": 15
+    },
+    "columns": [
+      {
+        "key": "image",
+        "title": "Image",
+        "type": "image",
+        "width": "80px",
+        "align": "center"
+      },
+      {
+        "key": "sku",
+        "title": "SKU",
+        "type": "text",
+        "sortable": true,
+        "filterable": true,
+        "width": "120px"
+      },
+      {
+        "key": "name",
+        "title": "Product Name",
+        "type": "text",
+        "sortable": true,
+        "filterable": true
+      },
+      {
+        "key": "category",
+        "title": "Category",
+        "type": "badge",
+        "sortable": true,
+        "filterable": true,
+        "width": "120px"
+      },
+      {
+        "key": "price",
+        "title": "Price",
+        "type": "currency",
+        "sortable": true,
+        "align": "right",
+        "width": "100px",
+        "format": {
+          "currency": "USD",
+          "decimalPlaces": 2
+        }
+      },
+      {
+        "key": "stock",
+        "title": "Stock",
+        "type": "number",
+        "sortable": true,
+        "align": "center",
+        "width": "80px",
+        "format": {
+          "suffix": " units"
+        }
+      },
+      {
+        "key": "rating",
+        "title": "Rating",
+        "type": "rating",
+        "sortable": true,
+        "width": "120px",
+        "align": "center"
+      },
+      {
+        "key": "status",
+        "title": "Status",
+        "type": "badge",
+        "sortable": true,
+        "filterable": true,
+        "width": "100px"
+      }
+    ],
+    "features": {
+      "searchable": true,
+      "sortable": true,
+      "filterable": true,
+      "exportable": true,
+      "selectable": true,
+      "multiSelect": false,
+      "refreshable": true,
+      "columnResize": true,
+      "columnReorder": true
+    }
+  },
+  "detailsSchema": {
+    "id": "product-details",
+    "title": "Product Details",
+    "description": "Detailed product information and management",
+    "layout": {
+      "type": "tabs",
+      "groups": [
+        {
+          "id": "basic",
+          "title": "Basic Info",
+          "icon": "pi pi-info-circle"
+        },
+        {
+          "id": "pricing",
+          "title": "Pricing & Inventory",
+          "icon": "pi pi-dollar"
+        },
+        {
+          "id": "media",
+          "title": "Media & Images",
+          "icon": "pi pi-images"
+        },
+        {
+          "id": "attributes",
+          "title": "Attributes",
+          "icon": "pi pi-tags"
+        }
+      ]
+    },
+    "fields": [
+      {
+        "key": "images",
+        "label": "Product Images",
+        "type": "file",
+        "component": "fileupload",
+        "layout": {
+          "col": 12,
+          "group": "media",
+          "order": 1
+        }
+      },
+      {
+        "key": "sku",
+        "label": "SKU",
+        "type": "text",
+        "component": "input",
+        "required": true,
+        "validation": {
+          "pattern": "^[A-Z0-9-]+$",
+          "messages": {
+            "pattern": "SKU must contain only uppercase letters, numbers, and hyphens"
+          }
+        },
+        "layout": {
+          "col": 6,
+          "group": "basic",
+          "order": 1
+        }
+      },
+      {
+        "key": "name",
+        "label": "Product Name",
+        "type": "text",
+        "component": "input",
+        "required": true,
+        "validation": {
+          "max": 100
+        },
+        "layout": {
+          "col": 6,
+          "group": "basic",
+          "order": 2
+        }
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "type": "textarea",
+        "component": "textarea",
+        "required": true,
+        "validation": {
+          "max": 1000
+        },
+        "layout": {
+          "col": 12,
+          "group": "basic",
+          "order": 3
+        }
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "type": "select",
+        "component": "dropdown",
+        "required": true,
+        "options": [
+          { "label": "Electronics", "value": "electronics" },
+          { "label": "Clothing", "value": "clothing" },
+          { "label": "Home & Garden", "value": "home-garden" },
+          { "label": "Sports & Outdoors", "value": "sports-outdoors" },
+          { "label": "Books", "value": "books" },
+          { "label": "Health & Beauty", "value": "health-beauty" }
+        ],
+        "layout": {
+          "col": 6,
+          "group": "basic",
+          "order": 4
+        }
+      },
+      {
+        "key": "brand",
+        "label": "Brand",
+        "type": "text",
+        "component": "input",
+        "layout": {
+          "col": 6,
+          "group": "basic",
+          "order": 5
+        }
+      },
+      {
+        "key": "basePrice",
+        "label": "Base Price",
+        "type": "number",
+        "component": "inputnumber",
+        "required": true,
+        "validation": {
+          "min": 0
+        },
+        "layout": {
+          "col": 4,
+          "group": "pricing",
+          "order": 1
+        }
+      },
+      {
+        "key": "salePrice",
+        "label": "Sale Price",
+        "type": "number",
+        "component": "inputnumber",
+        "validation": {
+          "min": 0
+        },
+        "layout": {
+          "col": 4,
+          "group": "pricing",
+          "order": 2
+        }
+      },
+      {
+        "key": "cost",
+        "label": "Cost Price",
+        "type": "number",
+        "component": "inputnumber",
+        "validation": {
+          "min": 0
+        },
+        "layout": {
+          "col": 4,
+          "group": "pricing",
+          "order": 3
+        }
+      },
+      {
+        "key": "stock",
+        "label": "Stock Quantity",
+        "type": "number",
+        "component": "inputnumber",
+        "required": true,
+        "validation": {
+          "min": 0
+        },
+        "layout": {
+          "col": 4,
+          "group": "pricing",
+          "order": 4
+        }
+      },
+      {
+        "key": "minStock",
+        "label": "Minimum Stock",
+        "type": "number",
+        "component": "inputnumber",
+        "validation": {
+          "min": 0
+        },
+        "layout": {
+          "col": 4,
+          "group": "pricing",
+          "order": 5
+        }
+      },
+      {
+        "key": "maxStock",
+        "label": "Maximum Stock",
+        "type": "number",
+        "component": "inputnumber",
+        "validation": {
+          "min": 0
+        },
+        "layout": {
+          "col": 4,
+          "group": "pricing",
+          "order": 6
+        }
+      },
+      {
+        "key": "weight",
+        "label": "Weight (kg)",
+        "type": "number",
+        "component": "inputnumber",
+        "validation": {
+          "min": 0,
+          "decimalPlaces": 2
+        },
+        "layout": {
+          "col": 4,
+          "group": "attributes",
+          "order": 1
+        }
+      },
+      {
+        "key": "dimensions",
+        "label": "Dimensions (L×W×H cm)",
+        "type": "text",
+        "component": "input",
+        "placeholder": "30×20×10",
+        "layout": {
+          "col": 4,
+          "group": "attributes",
+          "order": 2
+        }
+      },
+      {
+        "key": "color",
+        "label": "Color",
+        "type": "select",
+        "component": "dropdown",
+        "options": [
+          { "label": "Red", "value": "red" },
+          { "label": "Blue", "value": "blue" },
+          { "label": "Green", "value": "green" },
+          { "label": "Black", "value": "black" },
+          { "label": "White", "value": "white" },
+          { "label": "Gray", "value": "gray" }
+        ],
+        "layout": {
+          "col": 4,
+          "group": "attributes",
+          "order": 3
+        }
+      },
+      {
+        "key": "size",
+        "label": "Size",
+        "type": "select",
+        "component": "dropdown",
+        "options": [
+          { "label": "XS", "value": "xs" },
+          { "label": "S", "value": "s" },
+          { "label": "M", "value": "m" },
+          { "label": "L", "value": "l" },
+          { "label": "XL", "value": "xl" },
+          { "label": "XXL", "value": "xxl" }
+        ],
+        "layout": {
+          "col": 4,
+          "group": "attributes",
+          "order": 4
+        }
+      },
+      {
+        "key": "material",
+        "label": "Material",
+        "type": "text",
+        "component": "input",
+        "layout": {
+          "col": 4,
+          "group": "attributes",
+          "order": 5
+        }
+      },
+      {
+        "key": "warranty",
+        "label": "Warranty (months)",
+        "type": "number",
+        "component": "inputnumber",
+        "validation": {
+          "min": 0,
+          "max": 120
+        },
+        "layout": {
+          "col": 4,
+          "group": "attributes",
+          "order": 6
+        }
+      },
+      {
+        "key": "isActive",
+        "label": "Active Product",
+        "type": "boolean",
+        "component": "checkbox",
+        "layout": {
+          "col": 6,
+          "group": "basic",
+          "order": 6
+        }
+      },
+      {
+        "key": "featured",
+        "label": "Featured Product",
+        "type": "boolean",
+        "component": "checkbox",
+        "layout": {
+          "col": 6,
+          "group": "basic",
+          "order": 7
+        }
+      }
+    ],
+    "actions": [
+      {
+        "id": "save",
+        "label": "Save Product",
+        "type": "button",
+        "variant": "primary",
+        "icon": "pi pi-save",
+        "action": "saveProduct"
+      },
+      {
+        "id": "duplicate",
+        "label": "Duplicate",
+        "type": "button",
+        "variant": "secondary",
+        "icon": "pi pi-copy",
+        "action": "duplicateProduct"
+      },
+      {
+        "id": "export",
+        "label": "Export Data",
+        "type": "button",
+        "variant": "info",
+        "icon": "pi pi-download",
+        "action": "exportProduct"
+      },
+      {
+        "id": "delete",
+        "label": "Delete Product",
+        "type": "button",
+        "variant": "danger",
+        "icon": "pi pi-trash",
+        "action": "deleteProduct",
+        "confirm": {
+          "title": "Delete Product",
+          "message": "Are you sure you want to delete this product? This action cannot be undone.",
+          "acceptLabel": "Delete",
+          "rejectLabel": "Cancel"
+        }
+      }
+    ]
+  }
+}

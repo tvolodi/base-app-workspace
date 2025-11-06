@@ -1,0 +1,557 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Dynamic Master-Details Component Schemas",
+  "description": "JSON schema definitions for dynamic master-details component",
+  "type": "object",
+  "properties": {
+    "masterSchema": {
+      "$ref": "#/definitions/MasterSchema"
+    },
+    "detailsSchema": {
+      "$ref": "#/definitions/DetailsSchema"
+    }
+  },
+  "required": ["masterSchema", "detailsSchema"],
+  "definitions": {
+
+    "MasterSchema": {
+      "type": "object",
+      "title": "Master List Schema",
+      "description": "Schema defining the master list structure and behavior",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the master schema"
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title for the master list"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the master list"
+        },
+        "dataSource": {
+          "$ref": "#/definitions/DataSource"
+        },
+        "columns": {
+          "type": "array",
+          "description": "Column definitions for the master list",
+          "items": {
+            "$ref": "#/definitions/ColumnDefinition"
+          },
+          "minItems": 1
+        },
+        "features": {
+          "$ref": "#/definitions/MasterFeatures"
+        },
+        "styling": {
+          "$ref": "#/definitions/Styling"
+        }
+      },
+      "required": ["id", "title", "dataSource", "columns"]
+    },
+
+    "DetailsSchema": {
+      "type": "object",
+      "title": "Details View Schema",
+      "description": "Schema defining the details view structure and behavior",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the details schema"
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title for the details view"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the details view"
+        },
+        "layout": {
+          "$ref": "#/definitions/Layout"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Field definitions for the details view",
+          "items": {
+            "$ref": "#/definitions/FieldDefinition"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "description": "Action buttons or links for the details view",
+          "items": {
+            "$ref": "#/definitions/ActionDefinition"
+          }
+        },
+        "styling": {
+          "$ref": "#/definitions/Styling"
+        }
+      },
+      "required": ["id", "title", "fields"]
+    },
+
+    "DataSource": {
+      "type": "object",
+      "description": "Data source configuration",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["api", "static", "mock"],
+          "description": "Type of data source"
+        },
+        "endpoint": {
+          "type": "string",
+          "description": "API endpoint URL (for api type)"
+        },
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST"],
+          "default": "GET",
+          "description": "HTTP method for API calls"
+        },
+        "data": {
+          "description": "Static data array (for static type)"
+        },
+        "transform": {
+          "type": "string",
+          "description": "Optional data transformation function name"
+        },
+        "pagination": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable pagination"
+        },
+        "pageSize": {
+          "type": "integer",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Number of items per page"
+        }
+      },
+      "required": ["type"]
+    },
+
+    "ColumnDefinition": {
+      "type": "object",
+      "description": "Column configuration for master list",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Unique key for the column (maps to data field)"
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title for the column"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["text", "number", "date", "boolean", "currency", "email", "phone", "badge", "avatar", "icon", "custom"],
+          "description": "Data type for rendering"
+        },
+        "sortable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable sorting for this column"
+        },
+        "filterable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable filtering for this column"
+        },
+        "width": {
+          "type": "string",
+          "description": "Column width (CSS value like '200px' or '20%')"
+        },
+        "align": {
+          "type": "string",
+          "enum": ["left", "center", "right"],
+          "default": "left",
+          "description": "Text alignment"
+        },
+        "format": {
+          "type": "object",
+          "description": "Formatting options based on type",
+          "properties": {
+            "currency": {
+              "type": "string",
+              "enum": ["USD", "EUR", "GBP", "JPY"],
+              "description": "Currency code for currency type"
+            },
+            "dateFormat": {
+              "type": "string",
+              "default": "MM/DD/YYYY",
+              "description": "Date format pattern"
+            },
+            "decimalPlaces": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10,
+              "description": "Decimal places for numbers"
+            },
+            "prefix": {
+              "type": "string",
+              "description": "Text prefix"
+            },
+            "suffix": {
+              "type": "string",
+              "description": "Text suffix"
+            }
+          }
+        },
+        "hidden": {
+          "type": "boolean",
+          "default": false,
+          "description": "Hide column by default"
+        },
+        "render": {
+          "type": "string",
+          "description": "Custom render function name"
+        }
+      },
+      "required": ["key", "title", "type"]
+    },
+
+    "FieldDefinition": {
+      "type": "object",
+      "description": "Field configuration for details view",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Unique key for the field (maps to data field)"
+        },
+        "label": {
+          "type": "string",
+          "description": "Display label for the field"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["text", "textarea", "number", "date", "datetime", "boolean", "select", "multiselect", "radio", "checkbox", "email", "phone", "url", "password", "file", "image", "avatar", "badge", "progress", "rating", "slider", "color", "json", "code", "markdown", "html", "custom"],
+          "description": "Field type for rendering and validation"
+        },
+        "component": {
+          "type": "string",
+          "enum": ["input", "textarea", "dropdown", "calendar", "checkbox", "radiobutton", "inputnumber", "password", "fileupload", "avatar", "badge", "progressbar", "rating", "slider", "colorpicker", "editor", "custom"],
+          "description": "PrimeReact component to use"
+        },
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "Field is required"
+        },
+        "readonly": {
+          "type": "boolean",
+          "default": false,
+          "description": "Field is read-only"
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Field is disabled"
+        },
+        "placeholder": {
+          "type": "string",
+          "description": "Placeholder text"
+        },
+        "help": {
+          "type": "string",
+          "description": "Help text or tooltip"
+        },
+        "validation": {
+          "$ref": "#/definitions/ValidationRules"
+        },
+        "options": {
+          "type": "array",
+          "description": "Options for select/multiselect/radio fields",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "description": "Can be string, number, or object"
+              },
+              "disabled": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": ["label", "value"]
+          }
+        },
+        "layout": {
+          "$ref": "#/definitions/FieldLayout"
+        },
+        "dependencies": {
+          "type": "array",
+          "description": "Fields that this field depends on",
+          "items": {
+            "type": "string"
+          }
+        },
+        "conditional": {
+          "type": "object",
+          "description": "Conditional display logic",
+          "properties": {
+            "field": {
+              "type": "string",
+              "description": "Field to check"
+            },
+            "operator": {
+              "type": "string",
+              "enum": ["equals", "not_equals", "contains", "not_contains", "greater_than", "less_than", "is_empty", "is_not_empty"]
+            },
+            "value": {
+              "description": "Value to compare against"
+            }
+          }
+        },
+        "render": {
+          "type": "string",
+          "description": "Custom render function name"
+        }
+      },
+      "required": ["key", "label", "type"]
+    },
+
+    "ValidationRules": {
+      "type": "object",
+      "description": "Validation rules for fields",
+      "properties": {
+        "min": {
+          "type": ["number", "string"],
+          "description": "Minimum value/length"
+        },
+        "max": {
+          "type": ["number", "string"],
+          "description": "Maximum value/length"
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Regex pattern"
+        },
+        "custom": {
+          "type": "string",
+          "description": "Custom validation function name"
+        },
+        "messages": {
+          "type": "object",
+          "description": "Custom error messages",
+          "properties": {
+            "required": { "type": "string" },
+            "min": { "type": "string" },
+            "max": { "type": "string" },
+            "pattern": { "type": "string" },
+            "custom": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "FieldLayout": {
+      "type": "object",
+      "description": "Layout configuration for fields",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "default": 12,
+          "description": "Grid column span (1-12)"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 11,
+          "default": 0,
+          "description": "Grid column offset"
+        },
+        "group": {
+          "type": "string",
+          "description": "Field group identifier"
+        },
+        "order": {
+          "type": "integer",
+          "description": "Display order within group"
+        }
+      }
+    },
+
+    "ActionDefinition": {
+      "type": "object",
+      "description": "Action button/link configuration",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique action identifier"
+        },
+        "label": {
+          "type": "string",
+          "description": "Button/link text"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["button", "link", "icon"],
+          "default": "button"
+        },
+        "variant": {
+          "type": "string",
+          "enum": ["primary", "secondary", "success", "danger", "warning", "info", "help"],
+          "default": "primary"
+        },
+        "icon": {
+          "type": "string",
+          "description": "PrimeIcons icon name"
+        },
+        "action": {
+          "type": "string",
+          "description": "Action function name to execute"
+        },
+        "href": {
+          "type": "string",
+          "description": "URL for link type"
+        },
+        "target": {
+          "type": "string",
+          "enum": ["_blank", "_self", "_parent", "_top"],
+          "description": "Link target"
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "visible": {
+          "type": "boolean",
+          "default": true
+        },
+        "confirm": {
+          "type": "object",
+          "description": "Confirmation dialog configuration",
+          "properties": {
+            "title": { "type": "string" },
+            "message": { "type": "string" },
+            "acceptLabel": { "type": "string", "default": "Yes" },
+            "rejectLabel": { "type": "string", "default": "No" }
+          }
+        }
+      },
+      "required": ["id", "label"]
+    },
+
+    "MasterFeatures": {
+      "type": "object",
+      "description": "Feature flags for master list",
+      "properties": {
+        "searchable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable global search"
+        },
+        "sortable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable column sorting"
+        },
+        "filterable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable column filtering"
+        },
+        "exportable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable data export"
+        },
+        "selectable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable row selection"
+        },
+        "multiSelect": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable multiple row selection"
+        },
+        "refreshable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show refresh button"
+        },
+        "columnResize": {
+          "type": "boolean",
+          "default": true,
+          "description": "Allow column resizing"
+        },
+        "columnReorder": {
+          "type": "boolean",
+          "default": true,
+          "description": "Allow column reordering"
+        }
+      }
+    },
+
+    "Layout": {
+      "type": "object",
+      "description": "Layout configuration for details view",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["form", "card", "tabs", "accordion", "grid", "custom"],
+          "default": "form",
+          "description": "Layout type"
+        },
+        "columns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "default": 12,
+          "description": "Grid columns for responsive layout"
+        },
+        "groups": {
+          "type": "array",
+          "description": "Field groups for organized display",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "icon": { "type": "string" },
+              "collapsible": { "type": "boolean", "default": false },
+              "collapsed": { "type": "boolean", "default": false }
+            },
+            "required": ["id", "title"]
+          }
+        },
+        "spacing": {
+          "type": "string",
+          "enum": ["none", "small", "medium", "large"],
+          "default": "medium",
+          "description": "Spacing between elements"
+        }
+      }
+    },
+
+    "Styling": {
+      "type": "object",
+      "description": "Styling configuration",
+      "properties": {
+        "className": {
+          "type": "string",
+          "description": "CSS class name"
+        },
+        "style": {
+          "type": "object",
+          "description": "Inline styles object"
+        },
+        "theme": {
+          "type": "string",
+          "description": "Theme identifier"
+        }
+      }
+    }
+  }
+}

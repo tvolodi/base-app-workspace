@@ -21,7 +21,6 @@ const PrimeReactProfile = lazy(() => import('./components/PrimeReactProfile'));
 const PrimeReactUserManagement = lazy(() => import('./components/PrimeReactUserManagement'));
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const Sidebar = lazy(() => import('./components/Sidebar'));
-const MasterDetailsDemo = lazy(() => import('./pages/MasterDetailsDemo'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -212,14 +211,6 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
-                  <Route
-                    path="/master-details-demo"
-                    element={
-                      <ProtectedRoute>
-                        <MasterDetailsDemo />
-                      </ProtectedRoute>
-                    }
-                  />
                 </Routes>
               </Suspense>
             </main>
@@ -259,7 +250,6 @@ function App() {
             <h3>Component Demos</h3>
             <ul>
               <li><Link to="/dashboard">📊 Dashboard (New!)</Link></li>
-              <li><Link to="/master-details-demo">🎯 Dynamic Master-Details Demo</Link></li>
               <li><Link to="/profile">Original Profile Component</Link></li>
               <li><Link to="/prime-profile">PrimeReact Profile Component</Link></li>
               <li><Link to="/prime-users">PrimeReact User Management</Link></li>

@@ -123,7 +123,7 @@ const PrimeReactUserManagement = () => {
           <i className="pi pi-search" />
           <InputText
             type="search"
-            onInput={(e) => setGlobalFilter(e.target.value)}
+            onInput={(e) => setGlobalFilter((e.target as HTMLInputElement).value)}
             placeholder="Search users..."
           />
         </span>

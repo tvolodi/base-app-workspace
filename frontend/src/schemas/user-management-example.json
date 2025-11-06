@@ -1,0 +1,391 @@
+{
+  "masterSchema": {
+    "id": "user-list",
+    "title": "User Management",
+    "description": "Manage system users and their permissions",
+    "dataSource": {
+      "type": "api",
+      "endpoint": "/api/users",
+      "method": "GET",
+      "pagination": true,
+      "pageSize": 10
+    },
+    "columns": [
+      {
+        "key": "id",
+        "title": "ID",
+        "type": "number",
+        "sortable": true,
+        "width": "80px",
+        "align": "center"
+      },
+      {
+        "key": "avatar",
+        "title": "Avatar",
+        "type": "avatar",
+        "width": "60px",
+        "align": "center"
+      },
+      {
+        "key": "username",
+        "title": "Username",
+        "type": "text",
+        "sortable": true,
+        "filterable": true
+      },
+      {
+        "key": "email",
+        "title": "Email",
+        "type": "email",
+        "sortable": true,
+        "filterable": true
+      },
+      {
+        "key": "firstName",
+        "title": "First Name",
+        "type": "text",
+        "sortable": true,
+        "filterable": true
+      },
+      {
+        "key": "lastName",
+        "title": "Last Name",
+        "type": "text",
+        "sortable": true,
+        "filterable": true
+      },
+      {
+        "key": "role",
+        "title": "Role",
+        "type": "badge",
+        "sortable": true,
+        "filterable": true,
+        "width": "120px"
+      },
+      {
+        "key": "status",
+        "title": "Status",
+        "type": "badge",
+        "sortable": true,
+        "filterable": true,
+        "width": "100px"
+      },
+      {
+        "key": "createdAt",
+        "title": "Created",
+        "type": "date",
+        "sortable": true,
+        "width": "120px",
+        "format": {
+          "dateFormat": "MM/DD/YYYY"
+        }
+      },
+      {
+        "key": "lastLogin",
+        "title": "Last Login",
+        "type": "datetime",
+        "sortable": true,
+        "width": "150px",
+        "format": {
+          "dateFormat": "MM/DD/YYYY HH:mm"
+        }
+      }
+    ],
+    "features": {
+      "searchable": true,
+      "sortable": true,
+      "filterable": true,
+      "exportable": true,
+      "selectable": true,
+      "multiSelect": true,
+      "refreshable": true,
+      "columnResize": true,
+      "columnReorder": true
+    }
+  },
+  "detailsSchema": {
+    "id": "user-details",
+    "title": "User Details",
+    "description": "Detailed information and management for selected user",
+    "layout": {
+      "type": "form",
+      "columns": 12,
+      "groups": [
+        {
+          "id": "basic-info",
+          "title": "Basic Information",
+          "icon": "pi pi-user",
+          "collapsible": false
+        },
+        {
+          "id": "contact-info",
+          "title": "Contact Information",
+          "icon": "pi pi-envelope",
+          "collapsible": false
+        },
+        {
+          "id": "account-info",
+          "title": "Account Information",
+          "icon": "pi pi-shield",
+          "collapsible": false
+        },
+        {
+          "id": "permissions",
+          "title": "Permissions & Roles",
+          "icon": "pi pi-key",
+          "collapsible": true,
+          "collapsed": false
+        }
+      ],
+      "spacing": "medium"
+    },
+    "fields": [
+      {
+        "key": "avatar",
+        "label": "Profile Picture",
+        "type": "avatar",
+        "component": "avatar",
+        "layout": {
+          "col": 12,
+          "group": "basic-info",
+          "order": 1
+        }
+      },
+      {
+        "key": "username",
+        "label": "Username",
+        "type": "text",
+        "component": "input",
+        "required": true,
+        "validation": {
+          "min": 3,
+          "max": 50,
+          "pattern": "^[a-zA-Z0-9_]+$",
+          "messages": {
+            "pattern": "Username can only contain letters, numbers, and underscores"
+          }
+        },
+        "layout": {
+          "col": 6,
+          "group": "basic-info",
+          "order": 2
+        }
+      },
+      {
+        "key": "firstName",
+        "label": "First Name",
+        "type": "text",
+        "component": "input",
+        "required": true,
+        "validation": {
+          "max": 50
+        },
+        "layout": {
+          "col": 6,
+          "group": "basic-info",
+          "order": 3
+        }
+      },
+      {
+        "key": "lastName",
+        "label": "Last Name",
+        "type": "text",
+        "component": "input",
+        "required": true,
+        "validation": {
+          "max": 50
+        },
+        "layout": {
+          "col": 6,
+          "group": "basic-info",
+          "order": 4
+        }
+      },
+      {
+        "key": "email",
+        "label": "Email Address",
+        "type": "email",
+        "component": "input",
+        "required": true,
+        "validation": {
+          "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+          "messages": {
+            "pattern": "Please enter a valid email address"
+          }
+        },
+        "layout": {
+          "col": 6,
+          "group": "contact-info",
+          "order": 1
+        }
+      },
+      {
+        "key": "phone",
+        "label": "Phone Number",
+        "type": "phone",
+        "component": "input",
+        "placeholder": "+1 (555) 123-4567",
+        "layout": {
+          "col": 6,
+          "group": "contact-info",
+          "order": 2
+        }
+      },
+      {
+        "key": "status",
+        "label": "Account Status",
+        "type": "select",
+        "component": "dropdown",
+        "required": true,
+        "options": [
+          { "label": "Active", "value": "active" },
+          { "label": "Inactive", "value": "inactive" },
+          { "label": "Suspended", "value": "suspended" },
+          { "label": "Pending", "value": "pending" }
+        ],
+        "layout": {
+          "col": 6,
+          "group": "account-info",
+          "order": 1
+        }
+      },
+      {
+        "key": "role",
+        "label": "User Role",
+        "type": "select",
+        "component": "dropdown",
+        "required": true,
+        "options": [
+          { "label": "Administrator", "value": "admin" },
+          { "label": "Moderator", "value": "moderator" },
+          { "label": "User", "value": "user" },
+          { "label": "Guest", "value": "guest" }
+        ],
+        "layout": {
+          "col": 6,
+          "group": "account-info",
+          "order": 2
+        }
+      },
+      {
+        "key": "createdAt",
+        "label": "Account Created",
+        "type": "datetime",
+        "component": "calendar",
+        "readonly": true,
+        "layout": {
+          "col": 6,
+          "group": "account-info",
+          "order": 3
+        }
+      },
+      {
+        "key": "lastLogin",
+        "label": "Last Login",
+        "type": "datetime",
+        "component": "calendar",
+        "readonly": true,
+        "layout": {
+          "col": 6,
+          "group": "account-info",
+          "order": 4
+        }
+      },
+      {
+        "key": "permissions",
+        "label": "Permissions",
+        "type": "multiselect",
+        "component": "dropdown",
+        "options": [
+          { "label": "Read Users", "value": "users:read" },
+          { "label": "Write Users", "value": "users:write" },
+          { "label": "Delete Users", "value": "users:delete" },
+          { "label": "Read Roles", "value": "roles:read" },
+          { "label": "Write Roles", "value": "roles:write" },
+          { "label": "Read Audit Logs", "value": "audit:read" },
+          { "label": "System Administration", "value": "system:admin" }
+        ],
+        "layout": {
+          "col": 12,
+          "group": "permissions",
+          "order": 1
+        }
+      },
+      {
+        "key": "twoFactorEnabled",
+        "label": "Two-Factor Authentication",
+        "type": "boolean",
+        "component": "checkbox",
+        "layout": {
+          "col": 6,
+          "group": "account-info",
+          "order": 5
+        }
+      },
+      {
+        "key": "emailVerified",
+        "label": "Email Verified",
+        "type": "boolean",
+        "component": "checkbox",
+        "readonly": true,
+        "layout": {
+          "col": 6,
+          "group": "account-info",
+          "order": 6
+        }
+      }
+    ],
+    "actions": [
+      {
+        "id": "save",
+        "label": "Save Changes",
+        "type": "button",
+        "variant": "primary",
+        "icon": "pi pi-save",
+        "action": "saveUser"
+      },
+      {
+        "id": "reset-password",
+        "label": "Reset Password",
+        "type": "button",
+        "variant": "warning",
+        "icon": "pi pi-refresh",
+        "action": "resetPassword",
+        "confirm": {
+          "title": "Reset Password",
+          "message": "Are you sure you want to reset this user's password? They will receive an email with reset instructions.",
+          "acceptLabel": "Reset",
+          "rejectLabel": "Cancel"
+        }
+      },
+      {
+        "id": "suspend",
+        "label": "Suspend Account",
+        "type": "button",
+        "variant": "danger",
+        "icon": "pi pi-ban",
+        "action": "suspendUser",
+        "confirm": {
+          "title": "Suspend Account",
+          "message": "Are you sure you want to suspend this user account?",
+          "acceptLabel": "Suspend",
+          "rejectLabel": "Cancel"
+        }
+      },
+      {
+        "id": "delete",
+        "label": "Delete Account",
+        "type": "button",
+        "variant": "danger",
+        "icon": "pi pi-trash",
+        "action": "deleteUser",
+        "confirm": {
+          "title": "Delete Account",
+          "message": "Are you sure you want to permanently delete this user account? This action cannot be undone.",
+          "acceptLabel": "Delete",
+          "rejectLabel": "Cancel"
+        }
+      }
+    ]
+  }
+}

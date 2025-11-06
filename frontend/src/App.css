@@ -32,6 +32,17 @@ body {
   flex-direction: column;
 }
 
+/* Adjust main content when sidebar is present */
+.App main {
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+}
+
+/* Collapsed sidebar adjustment */
+.sidebar-container.collapsed ~ * .App main {
+  margin-left: 80px;
+}
+
 .App-header {
   background: var(--primary-color, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
   padding: 1rem 2rem;
@@ -39,8 +50,30 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 998;
   backdrop-filter: blur(10px);
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+}
+
+/* Mobile menu button */
+.mobile-menu-button {
+  display: none;
+  margin-right: 1rem;
+}
+
+@media (max-width: 992px) {
+  .App main {
+    margin-left: 0;
+  }
+
+  .App-header {
+    margin-left: 0;
+  }
+
+  .mobile-menu-button {
+    display: inline-flex;
+  }
 }
 
 .App-header h1 {
@@ -52,6 +85,7 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  display: inline-block;
 }
 
 .App-header nav {

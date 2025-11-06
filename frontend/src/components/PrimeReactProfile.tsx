@@ -6,6 +6,7 @@ import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '../utils/logger';
 
 const PrimeReactProfile = () => {
   const { authenticated, user, logout, loading, error } = useAuth();
@@ -29,7 +30,7 @@ const PrimeReactProfile = () => {
 
   const handleSave = () => {
     // Here you would typically save the updated profile data
-    console.log('Saving profile data:', formData);
+    logger.log('Saving profile data:', formData);
     setEditMode(false);
   };
 

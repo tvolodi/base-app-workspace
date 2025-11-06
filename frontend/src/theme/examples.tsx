@@ -183,7 +183,7 @@ export const ThemedNotificationPanel = () => {
         {notifications.map((notif, index) => (
           <Message
             key={index}
-            severity={notif.type}
+            severity={notif.type as "success" | "info" | "warn" | "error"}
             text={notif.message}
             className="w-full"
           />
@@ -252,7 +252,7 @@ export const ThemedActionButtons = () => {
 // Example 7: Hero Section
 export const ThemedHeroSection = () => {
   return (
-    <div style={themePresets.heroSection}>
+    <div style={themePresets.heroSection as React.CSSProperties}>
       <h1 style={{
         ...themePresets.gradientText,
         fontSize: '3.75rem',
