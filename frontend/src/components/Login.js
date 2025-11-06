@@ -1,73 +1,24 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [credentials, setCredentials] = useState({
-    username: '',
-    password: '',
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { login, loading } = useAuth();
 
-  const { login } = useAuth();
-  const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value,
-    });
+  const handleLogin = () => {
+    login();
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      await login(credentials);
-      navigate('/profile');
-    } catch (err) {
-      setError('Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="auth-form">
       <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={credentials.username}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={credentials.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {error && <div className="error">{error}</div>}
-        <button type="submit" disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
+      <button onClick={handleLogin}>Login with Keycloak</button>
       <p>
-        Don't have an account? <a href="/register">Register here</a>
+        Don't have an account? <Link to="/register">Register here</Link>
       </p>
     </div>
   );

@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -28,20 +28,46 @@ const PublicRoute = ({ children }) => {
   return isAuthenticated ? <Navigate to="/profile" /> : children;
 };
 
+// Header component
+const Header = () => {
+  const { isAuthenticated } = useAuth();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  return (
+    <header className="App-header">
+      <h1>Base-Application</h1>
+      <nav>
+        <div className="nav-left">
+          <Link to="/">Home</Link>
+        </div>
+        <div className="nav-right">
+          <div className="profile-menu">
+            <button onClick={() => setDropdownOpen(!dropdownOpen)}>Profile</button>
+            {dropdownOpen && (
+              <div className="dropdown">
+                {isAuthenticated ? (
+                  <Link to="/profile" onClick={() => setDropdownOpen(false)}>View Profile</Link>
+                ) : (
+                  <>
+                    <Link to="/login" onClick={() => setDropdownOpen(false)}>Login</Link>
+                    <Link to="/register" onClick={() => setDropdownOpen(false)}>Register</Link>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+    </header>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div className="App">
-          <header className="App-header">
-            <h1>Base-Application</h1>
-            <nav>
-              <a href="/">Home</a>
-              <a href="/login">Login</a>
-              <a href="/register">Register</a>
-              <a href="/profile">Profile</a>
-            </nav>
-          </header>
+          <Header />
           <main>
             <Routes>
               <Route path="/" element={<Home />} />
@@ -85,9 +111,9 @@ const Home = () => {
       <h2>Welcome to Base-Application</h2>
       <p>A modular application framework for small teams.</p>
       {isAuthenticated ? (
-        <p>Welcome back, {user?.first_name}!</p>
+        <p>Welcome back, {user?.name}!</p>
       ) : (
-        <p>Please <a href="/login">login</a> or <a href="/register">register</a> to continue.</p>
+        <p>Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to continue.</p>
       )}
     </div>
   );

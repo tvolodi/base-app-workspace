@@ -1,0 +1,69 @@
+{
+  "clientId": "base-app-frontend",
+  "name": "",
+  "description": "",
+  "rootUrl": "http://localhost:3000",
+  "adminUrl": "http://localhost:3000",
+  "baseUrl": "",
+  "surrogateAuthRequired": false,
+  "enabled": true,
+  "alwaysDisplayInConsole": false,
+  "clientAuthenticatorType": "client-secret",
+  "redirectUris": [
+    "http://localhost:3000/*"
+  ],
+  "webOrigins": [
+    "http://localhost:8080",
+    "http://localhost:8090",
+    "http://localhost:3000"
+  ],
+  "notBefore": 0,
+  "bearerOnly": false,
+  "consentRequired": false,
+  "standardFlowEnabled": true,
+  "implicitFlowEnabled": false,
+  "directAccessGrantsEnabled": false,
+  "serviceAccountsEnabled": false,
+  "publicClient": true,
+  "frontchannelLogout": true,
+  "protocol": "openid-connect",
+  "attributes": {
+    "realm_client": "false",
+    "oidc.ciba.grant.enabled": "false",
+    "backchannel.logout.session.required": "true",
+    "standard.token.exchange.enabled": "false",
+    "oauth2.device.authorization.grant.enabled": "false",
+    "backchannel.logout.revoke.offline.tokens": "false",
+    "dpop.bound.access.tokens": "false",
+    "pkce.code.challenge.method": "",
+    "login_theme": "",
+    "display.on.consent.screen": "false",
+    "consent.screen.text": "",
+    "frontchannel.logout.url": "",
+    "frontchannel.logout.session.required": "true"
+  },
+  "authenticationFlowBindingOverrides": {},
+  "fullScopeAllowed": true,
+  "nodeReRegistrationTimeout": -1,
+  "defaultClientScopes": [
+    "web-origins",
+    "acr",
+    "roles",
+    "profile",
+    "basic",
+    "email"
+  ],
+  "optionalClientScopes": [
+    "address",
+    "phone",
+    "offline_access",
+    "organization",
+    "microprofile-jwt"
+  ],
+  "access": {
+    "view": true,
+    "configure": true,
+    "manage": true
+  },
+  "authorizationServicesEnabled": false
+}
