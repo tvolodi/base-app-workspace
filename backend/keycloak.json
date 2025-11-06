@@ -2,7 +2,7 @@
   "url": "http://localhost:8080",
   "realm": "base-app",
   "client_id": "base-app-backend",
-  "client_secret": "4bhUNfPoZnthtz4BfcBTwDwyGWOxTFaq",
+  "client_secret": "xregCQ0Nw4Fr31Uy7KmXhDYyWT85TqCZ",
   "admin_username": "realm_admin",
   "admin_password": "realm_admin"
 }

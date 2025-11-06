@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  test-postgres:
+    image: postgres:15
+    container_name: test-postgres
+    environment:
+      POSTGRES_DB: rbac_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"  # Use different port to avoid conflicts with dev DB
+    volumes:
+      - test_db_data:/var/lib/postgresql/data
+      - ./init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rbac_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  test-keycloak:
+    image: quay.io/keycloak/keycloak:22.0
+    container_name: test-keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://test-postgres:5432/rbac_test
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT_HTTPS: false
+    ports:
+      - "8081:8080"  # Keycloak admin console
+      - "8082:8080"  # Keycloak API (if needed)
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+    command: ["start-dev", "--import-realm"]
+    volumes:
+      - ./keycloak-realm.json:/opt/keycloak/data/import/realm.json
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/realms/master || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+volumes:
+  test_db_data:

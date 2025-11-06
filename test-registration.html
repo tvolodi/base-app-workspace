@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' http://localhost:8080 http://localhost:8081 https: 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-src 'self' http://localhost:8080 http://localhost:8081; connect-src 'self' http://localhost:8080 http://localhost:8081;" />
+    <title>Keycloak Registration Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/keycloak-js@22.0.5/dist/keycloak.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .user-info { background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Keycloak Registration Test</h1>
+    <div id="status" class="status info">Initializing Keycloak...</div>
+
+    <div id="auth-buttons">
+        <button id="login">Login</button>
+        <button id="register">Register</button>
+        <button id="logout" style="display:none">Logout</button>
+    </div>
+
+    <div id="user-info" class="user-info" style="display:none">
+        <h2>User Information</h2>
+        <p><strong>Name:</strong> <span id="user-name"></span></p>
+        <p><strong>Email:</strong> <span id="user-email"></span></p>
+        <p><strong>Username:</strong> <span id="user-username"></span></p>
+        <p><strong>Groups:</strong> <span id="user-groups"></span></p>
+        <p><strong>Token (truncated):</strong> <span id="token-preview"></span></p>
+    </div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const loginBtn = document.getElementById('login');
+        const registerBtn = document.getElementById('register');
+        const logoutBtn = document.getElementById('logout');
+        const userInfoDiv = document.getElementById('user-info');
+
+        // Initialize Keycloak
+        const keycloak = new Keycloak({
+            url: 'http://localhost:8081',
+            realm: 'test-realm',
+            clientId: 'test-client'
+        });
+
+        keycloak.init({
+            onLoad: 'check-sso',
+            silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+            checkLoginIframe: false
+        }).then(authenticated => {
+            if (authenticated) {
+                statusDiv.textContent = '✅ Successfully authenticated!';
+                statusDiv.className = 'status success';
+                loginBtn.style.display = 'none';
+                registerBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline';
+                showUserInfo();
+            } else {
+                statusDiv.textContent = 'Not authenticated. Click Login or Register to continue.';
+                statusDiv.className = 'status info';
+                loginBtn.style.display = 'inline';
+                registerBtn.style.display = 'inline';
+                logoutBtn.style.display = 'none';
+            }
+        }).catch(err => {
+            statusDiv.textContent = '❌ Keycloak initialization failed: ' + err.message;
+            statusDiv.className = 'status error';
+            console.error('Keycloak init error:', err);
+        });
+
+        // Event handlers
+        loginBtn.onclick = () => {
+            statusDiv.textContent = 'Redirecting to login...';
+            statusDiv.className = 'status info';
+            keycloak.login({ redirectUri: window.location.href });
+        };
+
+        registerBtn.onclick = () => {
+            statusDiv.textContent = 'Redirecting to registration...';
+            statusDiv.className = 'status info';
+            keycloak.register({ redirectUri: window.location.href });
+        };
+
+        logoutBtn.onclick = () => {
+            keycloak.logout();
+            statusDiv.textContent = 'Logged out successfully.';
+            statusDiv.className = 'status info';
+            loginBtn.style.display = 'inline';
+            registerBtn.style.display = 'inline';
+            logoutBtn.style.display = 'none';
+            userInfoDiv.style.display = 'none';
+        };
+
+        function showUserInfo() {
+            userInfoDiv.style.display = 'block';
+            document.getElementById('user-name').textContent = keycloak.tokenParsed?.name || 'N/A';
+            document.getElementById('user-email').textContent = keycloak.tokenParsed?.email || 'N/A';
+            document.getElementById('user-username').textContent = keycloak.tokenParsed?.preferred_username || 'N/A';
+            document.getElementById('user-groups').textContent = keycloak.tokenParsed?.groups?.join(', ') || 'N/A';
+            document.getElementById('token-preview').textContent = keycloak.token ? keycloak.token.substring(0, 50) + '...' : 'N/A';
+        }
+
+        // Handle authentication events
+        keycloak.onAuthSuccess = () => {
+            statusDiv.textContent = '✅ Authentication successful!';
+            statusDiv.className = 'status success';
+            showUserInfo();
+        };
+
+        keycloak.onAuthError = (error) => {
+            statusDiv.textContent = '❌ Authentication failed: ' + error.error_description;
+            statusDiv.className = 'status error';
+        };
+
+        keycloak.onAuthRefreshSuccess = () => {
+            console.log('Token refreshed successfully');
+        };
+
+        keycloak.onAuthRefreshError = () => {
+            statusDiv.textContent = '❌ Token refresh failed. Please login again.';
+            statusDiv.className = 'status error';
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Keycloak Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/keycloak-js@22.0.5/dist/keycloak.min.js"></script>
+</head>
+<body>
+    <h1>Keycloak Authentication Test</h1>
+    <div id="status">Initializing...</div>
+    <button id="login" style="display:none">Login</button>
+    <button id="logout" style="display:none">Logout</button>
+    <div id="user-info" style="display:none"></div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const loginBtn = document.getElementById('login');
+        const logoutBtn = document.getElementById('logout');
+        const userInfoDiv = document.getElementById('user-info');
+
+        const keycloak = new Keycloak({
+            url: 'http://localhost:8081',
+            realm: 'test-realm',
+            clientId: 'test-client'
+        });
+
+        keycloak.init({
+            onLoad: 'check-sso',
+            silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+            checkLoginIframe: false
+        }).then(authenticated => {
+            if (authenticated) {
+                statusDiv.textContent = 'Authenticated';
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline';
+                showUserInfo();
+            } else {
+                statusDiv.textContent = 'Not authenticated';
+                loginBtn.style.display = 'inline';
+                logoutBtn.style.display = 'none';
+            }
+        }).catch(err => {
+            statusDiv.textContent = 'Error: ' + err.message;
+            console.error('Keycloak init error:', err);
+        });
+
+        loginBtn.onclick = () => {
+            keycloak.login();
+        };
+
+        logoutBtn.onclick = () => {
+            keycloak.logout();
+        };
+
+        function showUserInfo() {
+            userInfoDiv.style.display = 'block';
+            userInfoDiv.innerHTML = `
+                <h2>User Info</h2>
+                <p><strong>Name:</strong> ${keycloak.tokenParsed?.name || 'N/A'}</p>
+                <p><strong>Email:</strong> ${keycloak.tokenParsed?.email || 'N/A'}</p>
+                <p><strong>Username:</strong> ${keycloak.tokenParsed?.preferred_username || 'N/A'}</p>
+                <p><strong>Groups:</strong> ${keycloak.tokenParsed?.groups?.join(', ') || 'N/A'}</p>
+                <p><strong>Token:</strong> <textarea readonly style="width:100%;height:100px">${keycloak.token}</textarea></p>
+            `;
+        }
+    </script>
+</body>
+</html>

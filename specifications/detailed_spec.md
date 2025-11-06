@@ -4,6 +4,7 @@
 This document provides a detailed specification for each module in the Base-Application framework. Each module includes an overview, functional requirements, user stories, non-functional requirements, dependencies, database schema, API endpoints, frontend components, and test cases. This specification is designed to be directly usable for generating unit tests and source code in the AI-driven development process.
 
 ## 1. User Management
+## Status: Completed
 ### Overview
 Manages user identities, authentication, and profiles using Keycloak for identity and access management. Users are primarily managed in Keycloak, with local storage for application-specific data and references.
 
@@ -58,6 +59,7 @@ Manages user identities, authentication, and profiles using Keycloak for identit
 - Test profile update and sync with Keycloak
 
 ## 2. Role-Based Access Control (RBAC)
+## Status: In Progress
 ### Overview
 Defines roles, permissions, and role groups to control access to application features and data. Uses role groups for better organization and assignment.
 
@@ -68,6 +70,16 @@ Defines roles, permissions, and role groups to control access to application fea
 - User assignment to role groups (instead of direct roles).
 - Access control enforcement on resources.
 - Role hierarchy management.
+
+### Functinonal Requirements Update 1
+- User is assigned to a role groups for access management
+- User group have all permissions of roles assigned to the group
+- User has all permissions of all role groups the user is assigned to
+- Permission for an object consists from action types (create, read, update, delete)
+- Permissions for a role are set on the action type level
+- Role can be assigned to multiple role groups
+- Role can have multiple permissions
+- Role groups can contain multiple roles
 
 ### User Stories
 - As an administrator, I want to create roles so that I can organize user permissions.
