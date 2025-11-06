@@ -16,21 +16,14 @@ export const ThemeProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    // Remove existing theme link
-    const existingLink = document.querySelector('link[data-theme]');
-    if (existingLink) {
-      existingLink.remove();
+    let link = document.querySelector('link[data-theme]');
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.setAttribute('data-theme', 'primereact');
+      document.head.appendChild(link);
     }
-
-    // Add new theme link
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
     link.href = `/themes/${theme}/theme.css`;
-    link.setAttribute('data-theme', 'primereact');
-    document.head.appendChild(link);
-
-    // Save to localStorage
-    localStorage.setItem('primeReactTheme', theme);
   }, [theme]);
 
   const changeTheme = (newTheme) => {
