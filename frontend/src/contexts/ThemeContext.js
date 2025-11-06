@@ -24,6 +24,9 @@ export const ThemeProvider = ({ children }) => {
       document.head.appendChild(link);
     }
     link.href = `/themes/${theme}/theme.css`;
+
+    // Save to localStorage
+    localStorage.setItem('primeReactTheme', theme);
   }, [theme]);
 
   const changeTheme = (newTheme) => {
