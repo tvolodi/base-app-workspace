@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { ProgressSpinner } from 'primereact/progressspinner';
 
@@ -20,6 +20,7 @@ const ConditionalRoute = ({
   allowedRoles = null 
 }) => {
   const { authenticated, loading, user } = useAuth();
+  const location = useLocation();
 
   // Show loading spinner while authentication status is being determined
   if (loading) {
@@ -48,8 +49,10 @@ const ConditionalRoute = ({
   // Handle protected routes (requireAuth = true)
   if (requireAuth) {
     if (!authenticated) {
-      // Not authenticated, redirect to login
-      return <Navigate to={redirectTo || '/login'} replace />;
+      // Not authenticated, redirect to login with return URL
+      const loginUrl = redirectTo || '/login';
+      const returnUrl = `${loginUrl}?redirect=${encodeURIComponent(location.pathname + location.search)}`;
+      return <Navigate to={returnUrl} replace />;
     }
 
     // Check role-based access if roles are specified

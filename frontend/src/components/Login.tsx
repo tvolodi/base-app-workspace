@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useThemeStyles } from '../hooks/useThemeStyles';
 import { t } from '../translations';
@@ -11,9 +11,12 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 const Login = React.memo(() => {
   const { login, loading, loginLoading, error } = useAuth();
   const themeStyles = useThemeStyles();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect');
 
   const handleLogin = () => {
-    login();
+    const redirectUri = redirectTo ? window.location.origin + redirectTo : undefined;
+    login(redirectUri);
   };
 
   if (loading) {

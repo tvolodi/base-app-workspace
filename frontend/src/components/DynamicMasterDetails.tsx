@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card } from 'primereact/card';
 import { Splitter, SplitterPanel } from 'primereact/splitter';
 import { ScrollPanel } from 'primereact/scrollpanel';
@@ -6,10 +6,9 @@ import { Message } from 'primereact/message';
 import { MasterList } from './MasterList';
 import { DetailsView } from './DetailsView';
 import {
-  DynamicMasterDetailsProps,
-  MasterDetailsSchema,
-  ComponentConfig
+  DynamicMasterDetailsProps
 } from '../types/master-details-types';
+import api from '../services/api';
 
 interface DynamicMasterDetailsState {
   masterData: any[];
@@ -18,6 +17,7 @@ interface DynamicMasterDetailsState {
   error: string | null;
   masterLoading: boolean;
   detailsLoading: boolean;
+  modifiedData: Record<string, any>;
 }
 
 export const DynamicMasterDetails: React.FC<DynamicMasterDetailsProps> = ({
@@ -31,15 +31,11 @@ export const DynamicMasterDetails: React.FC<DynamicMasterDetailsProps> = ({
     loading: false,
     error: null,
     masterLoading: false,
-    detailsLoading: false
+    detailsLoading: false,
+    modifiedData: {}
   });
 
-  // Load master data on component mount
-  useEffect(() => {
-    loadMasterData();
-  }, [masterSchema]);
-
-  const loadMasterData = async () => {
+  const loadMasterData = useCallback(async () => {
     setState(prev => ({ ...prev, masterLoading: true, error: null }));
 
     try {
@@ -73,12 +69,77 @@ export const DynamicMasterDetails: React.FC<DynamicMasterDetailsProps> = ({
         masterLoading: false
       }));
     }
-  };
+  }, [masterSchema]);
+
+  // Load master data on component mount
+  useEffect(() => {
+    loadMasterData();
+  }, [loadMasterData]);
+
+  const loadData = useCallback(async () => {
+    try {
+      setState(prev => ({ ...prev, masterLoading: true, error: null }));
+
+      let data: any[] = [];
+      const { type } = masterSchema.dataSource;
+
+      switch (type) {
+        case 'api':
+          data = await loadFromApi(masterSchema.dataSource);
+          break;
+        case 'static':
+          data = masterSchema.dataSource.data || [];
+          break;
+        case 'mock':
+        default:
+          data = generateMockData(masterSchema);
+          break;
+      }
+
+      setState(prev => ({
+        ...prev,
+        masterData: data,
+        masterLoading: false
+      }));
+    } catch (error) {
+      console.error('Failed to load data:', error);
+      setState(prev => ({
+        ...prev,
+        error: error.message || 'Failed to load data',
+        masterLoading: false
+      }));
+    }
+  }, [masterSchema]);
 
   const loadFromApi = async (dataSource: any): Promise<any[]> => {
-    // TODO: Implement actual API call using the configured API service
-    // For now, return mock data
-    return generateMockData(masterSchema);
+    try {
+      const { endpoint, method = 'GET', params = {} } = dataSource;
+
+      let response;
+      switch (method.toUpperCase()) {
+        case 'GET':
+          response = await api.get(endpoint, { params });
+          break;
+        case 'POST':
+          response = await api.post(endpoint, params);
+          break;
+        case 'PUT':
+          response = await api.put(endpoint, params);
+          break;
+        case 'DELETE':
+          response = await api.delete(endpoint, { params });
+          break;
+        default:
+          throw new Error(`Unsupported HTTP method: ${method}`);
+      }
+
+      // Assume the response data is an array or has a data property that is an array
+      const data = response.data;
+      return Array.isArray(data) ? data : data.data || [];
+    } catch (error) {
+      console.error('API call failed:', error);
+      throw new Error(`Failed to load data from API: ${error.message || 'Unknown error'}`);
+    }
   };
 
   const generateMockData = (schema: any): any[] => {
@@ -136,34 +197,131 @@ export const DynamicMasterDetails: React.FC<DynamicMasterDetailsProps> = ({
     }, 500);
   };
 
-  const handleDetailsChange = (field: string, value: any) => {
-    if (state.selectedItem) {
+  const handleAction = async (actionId: string) => {
+    if (!state.selectedItem) {
+      console.warn('No item selected for action:', actionId);
+      return;
+    }
+
+    try {
+      setState(prev => ({ ...prev, loading: true, error: null }));
+
+      switch (actionId) {
+        case 'save':
+          await handleSave();
+          break;
+        case 'delete':
+          await handleDelete();
+          break;
+        case 'create':
+          await handleCreate();
+          break;
+        case 'refresh':
+          await loadData();
+          break;
+        default:
+          // Check if it's a custom action defined in the schema
+          const action = detailsSchema.actions?.find(a => a.id === actionId);
+          if (action) {
+            await handleCustomAction(action);
+          } else {
+            console.warn(`Unknown action: ${actionId}`);
+          }
+      }
+    } catch (error) {
+      console.error(`Action ${actionId} failed:`, error);
       setState(prev => ({
         ...prev,
-        selectedItem: {
-          ...prev.selectedItem,
-          [field]: value
-        }
+        error: error.message || `Failed to ${actionId} item`,
+        loading: false
       }));
+    } finally {
+      setState(prev => ({ ...prev, loading: false }));
     }
   };
 
-  const handleAction = async (actionId: string) => {
-    console.log(`Action triggered: ${actionId}`, state.selectedItem);
-
-    // TODO: Implement action handlers based on schema configuration
-    switch (actionId) {
-      case 'save':
-        // TODO: Save changes
-        console.log('Saving item:', state.selectedItem);
-        break;
-      case 'delete':
-        // TODO: Delete item
-        console.log('Deleting item:', state.selectedItem);
-        break;
-      default:
-        console.log(`Unknown action: ${actionId}`);
+  const handleSave = async () => {
+    const { endpoint } = masterSchema.dataSource;
+    if (!endpoint) {
+      throw new Error('No endpoint configured for save action');
     }
+
+    const dataToSave = { ...state.selectedItem, ...state.modifiedData };
+    const url = endpoint.replace(':id', state.selectedItem.id);
+
+    const response = await api.put(url, dataToSave);
+
+    // Update the item in the master data
+    setState(prev => ({
+      ...prev,
+      masterData: prev.masterData.map(item =>
+        item.id === state.selectedItem.id ? response.data : item
+      ),
+      selectedItem: response.data,
+      modifiedData: {}
+    }));
+  };
+
+  const handleDelete = async () => {
+    const { endpoint } = masterSchema.dataSource;
+    if (!endpoint) {
+      throw new Error('No endpoint configured for delete action');
+    }
+
+    const url = endpoint.replace(':id', state.selectedItem.id);
+
+    await api.delete(url);
+
+    // Remove the item from master data
+    setState(prev => ({
+      ...prev,
+      masterData: prev.masterData.filter(item => item.id !== state.selectedItem.id),
+      selectedItem: null,
+      modifiedData: {}
+    }));
+  };
+
+  const handleCreate = async () => {
+    const { endpoint } = masterSchema.dataSource;
+    if (!endpoint) {
+      throw new Error('No endpoint configured for create action');
+    }
+
+    const dataToCreate = state.modifiedData;
+    const response = await api.post(endpoint, dataToCreate);
+
+    // Add the new item to master data
+    setState(prev => ({
+      ...prev,
+      masterData: [response.data, ...prev.masterData],
+      selectedItem: response.data,
+      modifiedData: {}
+    }));
+  };
+
+  const handleCustomAction = async (action: any) => {
+    if (action.href) {
+      // Handle navigation actions
+      if (action.target === '_blank') {
+        window.open(action.href.replace(':id', state.selectedItem.id), '_blank');
+      } else {
+        window.location.href = action.href.replace(':id', state.selectedItem.id);
+      }
+    } else if (action.action) {
+      // Handle custom actions (could be API calls or other logic)
+      console.log('Custom action:', action.action, state.selectedItem);
+      // TODO: Implement custom action logic based on action.action
+    }
+  };
+
+  const handleDetailsChange = (field: string, value: any) => {
+    setState(prev => ({
+      ...prev,
+      modifiedData: {
+        ...prev.modifiedData,
+        [field]: value
+      }
+    }));
   };
 
   const renderContent = () => {

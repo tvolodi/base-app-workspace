@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Keycloak from 'keycloak-js';
+import type { KeycloakInstance } from 'keycloak-js';
 import { logger } from '../utils/logger';
 import { setKeycloakInstance } from '../services/api';
 
@@ -13,7 +14,7 @@ interface User {
 }
 
 interface AuthContextType {
-  keycloak: Keycloak.KeycloakInstance | null;
+  keycloak: KeycloakInstance | null;
   authenticated: boolean;
   user: User | null;
   loading: boolean;
@@ -22,7 +23,7 @@ interface AuthContextType {
   error: string | null;
   sessionWarning: boolean;
   online: boolean;
-  login: () => Promise<void>;
+  login: (redirectUri?: string) => Promise<void>;
   register: () => Promise<void>;
   logout: () => void;
 }
@@ -44,7 +45,7 @@ const KEYCLOAK_CONFIG = {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [keycloak, setKeycloak] = useState<Keycloak.KeycloakInstance | null>(null);
+  const [keycloak, setKeycloak] = useState<KeycloakInstance | null>(null);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -90,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
         
-        const keycloakInstance = Keycloak({
+        const keycloakInstance = new (Keycloak as any)({
           url: KEYCLOAK_CONFIG.url,
           realm: KEYCLOAK_CONFIG.realm,
           clientId: KEYCLOAK_CONFIG.clientId,
@@ -172,12 +173,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [logout]);
 
-  const login = async () => {
+  const login = async (redirectUri?: string) => {
     if (!keycloak) return;
     setLoginLoading(true);
     setError(null);
     try {
-      await keycloak.login({ redirectUri: window.location.origin + '/profile' });
+      const defaultRedirectUri = window.location.origin + '/profile';
+      await keycloak.login({ redirectUri: redirectUri || defaultRedirectUri });
       logger.log('User initiated login');
     } catch (err) {
       if (err.message.includes('Network') || err.message.includes('fetch')) {
